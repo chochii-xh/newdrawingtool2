@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TheNewDrawingTool</title>
+  <style type="text/css">
+
+      body {
+      background-image: url('https://img.freepik.com/free-vector/hole-punched-paper-note-on-green-and-pink-watercolor-background_53876-116092.jpg?w=1060&t=st=1697678019~exp=1697678619~hmac=78f00a82f12284e751e4734af79252a653e3cd9d51b9f9f0d02a36f1840fc551');
+      background-size: cover; /* 창에 맞게 이미지 크기 조절 */
+      background-repeat: no-repeat; /* 이미지 반복 방지 */
+    }
+
+    .dot {
+      position: absolute;
+    }
+    #font-size-slider {
+      width: 200px;
+    }
+    #color-picker {
+      margin-top: 10px;
+    }
+    #slider-container {
+      position: relative;
+      width: 200px;
+      margin-bottom: 20px;
+    }
+    #font-info {
+      margin-top: 10px;
+    }
+  </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sunflower:wght@500&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div id="slider-container">
+    <input type="range" id="font-size-slider" min="10" max="50" step="0.5" value="15">
+    <input type="color" id="color-picker" value="#000000">
+    <button id="eraser-button">지우개</button>
+    <div id="font-info"></div>
+  </div>
+  <div>
+    <button onclick="startCreatingDots()">글 입력하기</button>
+  </div>
+  <script type="text/javascript">
+
+    let words = [];
+    let counter = 0;
+    let wordIndex = 0;
+    let isEraserActive = false;
+    let isCreating = false;
+    let fontIndex = 0;
+
+    const fontFamilies = [
+      'Noto Sans KR, sans-serif',
+      'Noto Serif KR, serif',
+      'Black Han Sans, sans-serif',
+      'Sunflower, sans-serif'
+    ];
+
+    const fontSizeSlider = document.getElementById('font-size-slider');
+    const colorPicker = document.getElementById('color-picker');
+    const sliderContainer = document.getElementById('slider-container');
+    const eraserButton = document.getElementById('eraser-button');
+    const fontInfo = document.getElementById('font-info');
+
+    function startCreatingDots() {
+      const userInput = prompt('좋아하는 글귀를 입력해주세요. 길수록 좋습니다. 줄 바꿈 없이 입력해주세요.');
+      if (userInput) {
+        words = userInput.split(" ");
+        wordIndex = 0; // Reset word index
+        counter = 0; // Reset counter
+        isCreating = true;
+      }
+    }
+
+    function getRandomFontIndex() {
+      return Math.floor(Math.random() * fontFamilies.length);
+    }
+
+    window.onmousemove = function(e) {
+      if (!isCreating) return;
+
+      if (isEraserActive) {
+        const mouseX = e.clientX;
+        const mouseY = e.clientY;
+        const elements = document.elementsFromPoint(mouseX, mouseY);
+        elements.forEach(element => {
+          if (element.classList.contains('dot')) {
+            element.remove();
+          }
+        });
+        return;
+      }
+
+      if (e.target === sliderContainer) {
+        return;
+      }
+
+      const sliderLeft = sliderContainer.offsetLeft;
+      const sliderRight = sliderContainer.offsetLeft + 200;
+      const mouseX = e.clientX;
+
+      if (mouseX >= sliderLeft - 20 && mouseX <= sliderRight + 20) {
+        return;
+      }
+
+      if (counter % 10 == 0) {
+        let dot = document.createElement('div');
+        dot.className = 'dot';
+        dot.style.fontSize = `${fontSizeSlider.value}px`;
+        dot.style.color = colorPicker.value;
+        dot.style.left = e.clientX + 'px';
+        dot.style.top = e.clientY + 'px';
+        dot.style.fontFamily = fontFamilies[fontIndex];
+        dot.innerText = words[wordIndex] || '';
+        document.body.appendChild(dot);
+        wordIndex = (wordIndex + 1) % words.length;
+      }
+      counter++;
+    };
+
+    window.onclick = function(e) {
+      if (!isCreating) return;
+      fontIndex = (fontIndex + 1) % fontFamilies.length;
+      fontInfo.innerText = `Current Font: ${fontFamilies[fontIndex]}`;
+    };
+
+    eraserButton.addEventListener('click', () => {
+      isEraserActive = !isEraserActive;
+      eraserButton.innerText = isEraserActive ? '지우개 끄기' : '지우개';
+    });
+  </script>
+</body>
+</html>
